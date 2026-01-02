@@ -1,5 +1,5 @@
 
-/*
+/**
  * Interface representing a single note object
  */
 export interface Note {
