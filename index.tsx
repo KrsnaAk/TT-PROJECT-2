@@ -2,10 +2,18 @@
 // Strictly adhering to project specifications: No Frameworks, LocalStorage Persistence.
 
 /**
+ * Type Definitions
+ */
+interface Note {
+    id: string;
+    content: string;
+}
+
+/**
  * State Management
  */
-let notes = JSON.parse(localStorage.getItem('college_project_notes') || '[]');
-let editingId = null;
+let notes: Note[] = JSON.parse(localStorage.getItem('college_project_notes') || '[]');
+let editingId: string | null = null;
 
 /**
  * DOM Elements
@@ -44,7 +52,7 @@ const renderNotes = () => {
         return;
     }
 
-    notes.forEach((note: { id: string, content: string }) => {
+    notes.forEach((note: Note) => {
         const isEditing = editingId === note.id;
         
         const card = document.createElement('div');
@@ -90,7 +98,7 @@ const addNote = () => {
     warningMsg?.classList.add('hidden');
     noteInput.classList.remove('border-red-300');
 
-    const newNote = {
+    const newNote: Note = {
         id: Date.now().toString(),
         content: content
     };
@@ -102,7 +110,7 @@ const addNote = () => {
 };
 
 const deleteNote = (id: string) => {
-    notes = notes.filter((n: { id: string }) => n.id !== id);
+    notes = notes.filter((n: Note) => n.id !== id);
     saveToStorage();
     renderNotes();
 };
@@ -117,7 +125,7 @@ const saveEdit = (id: string) => {
     if (input) {
         const newContent = input.value.trim();
         if (newContent) {
-            notes = notes.map((n: { id: string, content: string }) => 
+            notes = notes.map((n: Note) => 
                 n.id === id ? { ...n, content: newContent } : n
             );
             editingId = null;
