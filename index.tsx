@@ -1,43 +1,94 @@
+// Notes Management Web Application - Vanilla JavaScript
+// Strictly adhering to project specifications: No Frameworks, LocalStorage Persistence.
+
 /**
- * Notes Management Web Application - Vanilla JS Core
- * This script handles all CRUD operations and UI updates without frameworks.
+ * State Management
  */
+let notes = JSON.parse(localStorage.getItem('college_project_notes') || '[]');
+let editingId = null;
 
-// --- State Management ---
-let notes = JSON.parse(localStorage.getItem('notes_app_data')) || [];
-let editingNoteId = null;
-
-// --- DOM Elements ---
+/**
+ * DOM Elements
+ */
 const noteInput = document.getElementById('noteInput') as HTMLTextAreaElement;
 const addNoteBtn = document.getElementById('addNoteBtn');
 const notesContainer = document.getElementById('notesContainer');
-const noteCount = document.getElementById('noteCount');
-const yearSpan = document.getElementById('year');
-
-// Set current year
-if (yearSpan) yearSpan.textContent = new Date().getFullYear().toString();
-
-// --- Core Functions ---
+const warningMsg = document.getElementById('warningMsg');
+const noteStats = document.getElementById('noteStats');
 
 /**
- * Save notes to LocalStorage
+ * Core Logic Functions
  */
-function saveNotes() {
-    localStorage.setItem('notes_app_data', JSON.stringify(notes));
-    renderNotes();
-}
 
-/**
- * Add a new note
- */
-function addNote() {
-    const content = noteInput.value.trim();
-    
-    // 5. Error Handling: Prevent empty notes
-    if (!content) {
-        alert('Error: You cannot save an empty note!');
+const saveToStorage = () => {
+    localStorage.setItem('college_project_notes', JSON.stringify(notes));
+};
+
+const updateStats = () => {
+    if (noteStats) {
+        noteStats.textContent = `${notes.length} Note${notes.length === 1 ? '' : 's'}`;
+    }
+};
+
+const renderNotes = () => {
+    if (!notesContainer) return;
+    notesContainer.innerHTML = '';
+
+    if (notes.length === 0) {
+        notesContainer.innerHTML = `
+            <div class="col-span-full py-20 text-center bg-white border-2 border-dashed border-slate-200 rounded-2xl">
+                <p class="text-slate-400 font-medium">No notes available. Start adding some!</p>
+            </div>
+        `;
+        updateStats();
         return;
     }
+
+    notes.forEach((note: { id: string, content: string }) => {
+        const isEditing = editingId === note.id;
+        
+        const card = document.createElement('div');
+        card.className = 'note-card bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between min-h-[160px]';
+        
+        if (isEditing) {
+            card.innerHTML = `
+                <textarea 
+                    id="edit-input-${note.id}" 
+                    class="w-full p-3 bg-slate-50 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3 flex-grow text-slate-700"
+                >${note.content}</textarea>
+                <div class="flex gap-2">
+                    <button onclick="window.app.saveEdit('${note.id}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all">Save</button>
+                    <button onclick="window.app.cancelEdit()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold transition-all">Cancel</button>
+                </div>
+            `;
+        } else {
+            card.innerHTML = `
+                <div class="flex-grow mb-4">
+                    <p class="text-slate-700 whitespace-pre-wrap break-words leading-relaxed">${escapeHtml(note.content)}</p>
+                </div>
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                    <button onclick="window.app.startEdit('${note.id}')" class="text-blue-600 hover:text-blue-800 text-sm font-bold transition-colors">Edit</button>
+                    <button onclick="window.app.deleteNote('${note.id}')" class="text-red-600 hover:text-red-800 text-sm font-bold transition-colors">Delete</button>
+                </div>
+            `;
+        }
+        notesContainer.appendChild(card);
+    });
+
+    updateStats();
+};
+
+const addNote = () => {
+    const content = noteInput.value.trim();
+
+    if (!content) {
+        warningMsg?.classList.remove('hidden');
+        noteInput.classList.add('border-red-300');
+        return;
+    }
+
+    warningMsg?.classList.add('hidden');
+    noteInput.classList.remove('border-red-300');
 
     const newNote = {
         id: Date.now().toString(),
@@ -45,118 +96,46 @@ function addNote() {
     };
 
     notes.unshift(newNote);
+    saveToStorage();
     noteInput.value = '';
-    saveNotes();
-}
-
-/**
- * Delete a note
- */
-function deleteNote(id: string) {
-    notes = notes.filter(n => n.id !== id);
-    saveNotes();
-}
-
-/**
- * Start editing a note
- */
-function startEdit(id: string) {
-    editingNoteId = id;
     renderNotes();
-}
+};
 
-/**
- * Update note content
- */
-function updateNote(id: string, newContent: string) {
-    if (!newContent.trim()) {
-        alert('Content cannot be empty.');
-        return;
-    }
-    
-    notes = notes.map(n => n.id === id ? { ...n, content: newContent } : n);
-    editingNoteId = null;
-    saveNotes();
-}
-
-/**
- * Cancel editing
- */
-function cancelEdit() {
-    editingNoteId = null;
+const deleteNote = (id: string) => {
+    notes = notes.filter((n: { id: string }) => n.id !== id);
+    saveToStorage();
     renderNotes();
-}
+};
 
-/**
- * Main Render Function
- * Rebuilds the notes list in the UI based on current state.
- */
-function renderNotes() {
-    if (!notesContainer || !noteCount) return;
+const startEdit = (id: string) => {
+    editingId = id;
+    renderNotes();
+};
 
-    noteCount.textContent = notes.length.toString();
-
-    if (notes.length === 0) {
-        notesContainer.innerHTML = `
-            <div class="col-span-full bg-white rounded-2xl p-16 text-center border-2 border-dashed border-slate-200 flex flex-col items-center">
-                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4 text-slate-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                </div>
-                <h3 class="text-xl font-semibold text-slate-700 mb-2">Your collection is empty</h3>
-                <p class="text-slate-400 max-w-xs mx-auto">Use the panel to the left to create your first note and get started.</p>
-            </div>
-        `;
-        return;
-    }
-
-    notesContainer.innerHTML = '';
-
-    notes.forEach(note => {
-        const isEditing = editingNoteId === note.id;
-        const card = document.createElement('div');
-        card.className = "group bg-white rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 border border-slate-200 transition-all duration-300 flex flex-col h-full overflow-hidden";
-        
-        if (isEditing) {
-            card.innerHTML = `
-                <div class="h-1.5 w-full bg-indigo-500"></div>
-                <div class="p-6 flex flex-col h-full">
-                    <textarea id="edit-area-${note.id}" class="flex-grow w-full p-3 bg-slate-50 border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none mb-4 text-slate-700 leading-relaxed font-medium" rows="4">${note.content}</textarea>
-                    <div class="flex gap-2">
-                        <button onclick="window.app.saveEdit('${note.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm">Save Changes</button>
-                        <button onclick="window.app.cancelEdit()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2 rounded-lg text-sm font-bold transition-colors">Cancel</button>
-                    </div>
-                </div>
-            `;
+const saveEdit = (id: string) => {
+    const input = document.getElementById(`edit-input-${id}`) as HTMLTextAreaElement;
+    if (input) {
+        const newContent = input.value.trim();
+        if (newContent) {
+            notes = notes.map((n: { id: string, content: string }) => 
+                n.id === id ? { ...n, content: newContent } : n
+            );
+            editingId = null;
+            saveToStorage();
+            renderNotes();
         } else {
-            card.innerHTML = `
-                <div class="h-1.5 w-full bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div class="p-6 flex flex-col h-full">
-                    <div class="flex-grow">
-                        <p class="text-slate-700 whitespace-pre-wrap leading-relaxed break-words font-medium text-[15px]">${escapeHtml(note.content)}</p>
-                    </div>
-                    <div class="mt-8 flex items-center justify-between border-t border-slate-100 pt-4">
-                        <div class="flex gap-3">
-                            <button onclick="window.app.startEdit('${note.id}')" class="flex items-center gap-1.5 text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-md text-sm font-bold transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                                Edit
-                            </button>
-                            <button onclick="window.app.deleteNote('${note.id}')" class="flex items-center gap-1.5 text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-md text-sm font-bold transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
+            alert('Note cannot be empty!');
         }
-        notesContainer.appendChild(card);
-    });
-}
+    }
+};
+
+const cancelEdit = () => {
+    editingId = null;
+    renderNotes();
+};
 
 /**
- * Utility: Escape HTML to prevent XSS
+ * Security: Simple HTML Escaping
  */
 function escapeHtml(text: string) {
     const div = document.createElement('div');
@@ -164,28 +143,20 @@ function escapeHtml(text: string) {
     return div.innerHTML;
 }
 
-// --- Global API for Inline Event Handlers ---
-// Using window assignment to allow onclick handlers to work without a bundler mapping
+/**
+ * Expose functions to global scope for HTML onclick handlers
+ */
 (window as any).app = {
     deleteNote,
     startEdit,
-    cancelEdit,
-    saveEdit: (id: string) => {
-        const area = document.getElementById(`edit-area-${id}`) as HTMLTextAreaElement;
-        if (area) updateNote(id, area.value);
-    }
+    saveEdit,
+    cancelEdit
 };
 
-// --- Event Listeners ---
+/**
+ * Initialize Event Listeners
+ */
 addNoteBtn?.addEventListener('click', addNote);
 
-// Allow Enter to add note (if not Shift+Enter)
-noteInput?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        addNote();
-    }
-});
-
-// Initialize app
+// Initial Render
 renderNotes();

@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview"
   },
-  "devDependencies": {
+  "dependencies": {
     "typescript": "^5.7.2",
     "vite": "^6.0.0"
   }
