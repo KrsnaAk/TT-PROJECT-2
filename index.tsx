@@ -12,6 +12,7 @@ interface Note {
 /**
  * State Management
  */
+// Explicitly typed to resolve VS Code errors
 let notes: Note[] = JSON.parse(localStorage.getItem('college_project_notes') || '[]');
 let editingId: string | null = null;
 
