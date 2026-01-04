@@ -5,11 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node node_modules/vite/bin/vite.js build",
+    "build": "npx vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
-    "typescript": "^5.7.2",
     "vite": "^6.0.0"
   }
 }

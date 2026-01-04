@@ -1,25 +1,13 @@
-// Notes Management Web Application - Vanilla JavaScript
-// Strictly adhering to project specifications: No Frameworks, LocalStorage Persistence.
-
-/**
- * Type Definitions
- */
-interface Note {
-    id: string;
-    content: string;
-}
-
 /**
  * State Management
  */
-// Explicitly typed to resolve VS Code errors
-let notes: Note[] = JSON.parse(localStorage.getItem('college_project_notes') || '[]');
-let editingId: string | null = null;
+let notes = JSON.parse(localStorage.getItem('college_project_notes') || '[]');
+let editingId = null;
 
 /**
  * DOM Elements
  */
-const noteInput = document.getElementById('noteInput') as HTMLTextAreaElement;
+const noteInput = document.getElementById('noteInput');
 const addNoteBtn = document.getElementById('addNoteBtn');
 const notesContainer = document.getElementById('notesContainer');
 const warningMsg = document.getElementById('warningMsg');
@@ -53,7 +41,7 @@ const renderNotes = () => {
         return;
     }
 
-    notes.forEach((note: Note) => {
+    notes.forEach((note) => {
         const isEditing = editingId === note.id;
         
         const card = document.createElement('div');
@@ -99,7 +87,7 @@ const addNote = () => {
     warningMsg?.classList.add('hidden');
     noteInput.classList.remove('border-red-300');
 
-    const newNote: Note = {
+    const newNote = {
         id: Date.now().toString(),
         content: content
     };
@@ -110,23 +98,23 @@ const addNote = () => {
     renderNotes();
 };
 
-const deleteNote = (id: string) => {
-    notes = notes.filter((n: Note) => n.id !== id);
+const deleteNote = (id) => {
+    notes = notes.filter((n) => n.id !== id);
     saveToStorage();
     renderNotes();
 };
 
-const startEdit = (id: string) => {
+const startEdit = (id) => {
     editingId = id;
     renderNotes();
 };
 
-const saveEdit = (id: string) => {
-    const input = document.getElementById(`edit-input-${id}`) as HTMLTextAreaElement;
+const saveEdit = (id) => {
+    const input = document.getElementById(`edit-input-${id}`);
     if (input) {
         const newContent = input.value.trim();
         if (newContent) {
-            notes = notes.map((n: Note) => 
+            notes = notes.map((n) => 
                 n.id === id ? { ...n, content: newContent } : n
             );
             editingId = null;
@@ -146,7 +134,7 @@ const cancelEdit = () => {
 /**
  * Security: Simple HTML Escaping
  */
-function escapeHtml(text: string) {
+function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
@@ -155,7 +143,7 @@ function escapeHtml(text: string) {
 /**
  * Expose functions to global scope for HTML onclick handlers
  */
-(window as any).app = {
+window.app = {
     deleteNote,
     startEdit,
     saveEdit,
