@@ -1,5 +1,0 @@
-{
-  "name": "Notes Management Web Application",
-  "description": "A clean and responsive college project for managing personal notes with full CRUD functionality and local storage persistence.",
-  "requestFramePermissions": []
-}

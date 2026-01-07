@@ -1,69 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notes Management Web Application</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .note-card { transition: all 0.2s ease-in-out; }
-        .note-card:hover { transform: translateY(-2px); }
-    </style>
-<script type="importmap">
-{
-  "imports": {
-    "vite": "https://esm.sh/vite@^7.3.0"
-  }
-}
-</script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notes — Modern Web App</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-900">
-    <div class="max-w-5xl mx-auto px-4 py-12">
-        <!-- Header -->
-        <header class="mb-12 border-b border-slate-200 pb-6">
-            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Notes<span class="text-blue-600">Manager</span></h1>
-            <p class="text-slate-500 mt-2">Manage your thoughts and tasks with ease.</p>
-        </header>
 
-        <main class="grid grid-cols-1 md:grid-cols-12 gap-8">
-            <!-- Note Input Panel -->
-            <section class="md:col-span-4">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 sticky top-8">
-                    <h2 class="text-lg font-bold mb-4 text-slate-800">Create New Note</h2>
-                    <textarea 
-                        id="noteInput" 
-                        placeholder="Write your note here..." 
-                        class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none transition-all resize-none h-40 mb-2 text-slate-700"
-                    ></textarea>
-                    
-                    <!-- Warning Message -->
-                    <p id="warningMsg" class="text-red-500 text-sm font-medium mb-4 hidden">Please enter some text before adding.</p>
-                    
-                    <button 
-                        id="addNoteBtn" 
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-blue-200"
-                    >
-                        Add Note
-                    </button>
-                </div>
-            </section>
+<body class="min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 
+             flex justify-center px-4 py-6">
 
-            <!-- Notes List -->
-            <section class="md:col-span-8">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold text-slate-800">Your Notes</h2>
-                    <span id="noteStats" class="text-sm font-medium bg-slate-200 text-slate-600 px-3 py-1 rounded-full">0 Notes</span>
-                </div>
-                
-                <div id="notesContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Dynamic Notes will be injected here -->
-                </div>
-            </section>
-        </main>
+  <div class="app-card w-full max-w-3xl">
+    
+    <h1 class="text-3xl font-bold text-white drop-shadow mb-3">📝 Notes Manager</h1>
+    <p id="message" class="hidden text-sm font-semibold mb-2"></p>
+
+    <!-- Input Area -->
+    <div class="bg-white/20 backdrop-blur-lg rounded-2xl p-4 shadow-lg border border-white/30">
+      <textarea id="noteInput" placeholder="Write your note..."
+        class="w-full p-3 rounded-xl border border-white/40 bg-white/20 text-white placeholder-white/70 focus:ring-2 focus:ring-yellow-300 outline-none resize-none"
+        rows="4"></textarea>
+
+      <button id="addBtn"
+        class="mt-3 px-5 py-2 rounded-xl bg-yellow-400 text-gray-900 font-semibold shadow hover:bg-yellow-300 transition">
+        Add Note
+      </button>
     </div>
 
-    <script type="module" src="/index.js"></script>
+    <!-- Notes Section -->
+    <h2 class="text-xl font-semibold text-white mt-6 mb-2">Your Notes</h2>
+
+    <div id="notesContainer" class="grid gap-4 sm:grid-cols-2"></div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
